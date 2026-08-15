@@ -21,24 +21,6 @@ const WelcomePage = () => {
           Записывайте свои желания, создавайте категории и следите за их исполнением
         </p>
 
-        <div className="welcome-features">
-          <div className="feature">
-            <div className="feature-icon">🎯</div>
-            <h3>Ставьте цели</h3>
-            <p>Четко формулируйте свои желания</p>
-          </div>
-          <div className="feature">
-            <div className="feature-icon">🗂️</div>
-            <h3>Создавайте категории</h3>
-            <p>Организуйте желания по темам</p>
-          </div>
-          <div className="feature">
-            <div className="feature-icon">📈</div>
-            <h3>Отслеживайте прогресс</h3>
-            <p>Следите за исполнением желаний</p>
-          </div>
-        </div>
-
         <div className="auth-buttons">
           <button className="btn btn-primary" onClick={() => openModal('login')}>
             Войти

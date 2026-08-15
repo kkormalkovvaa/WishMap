@@ -1,0 +1,139 @@
+.add-cat-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 16px;
+}
+
+.add-cat-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.add-cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-cat-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.add-cat-close {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.add-cat-close:hover {
+  color: #333;
+}
+
+.add-cat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  max-height: 180px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.add-cat-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 2px;
+  font-size: 0.85rem;
+  color: #444;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.add-cat-list li:last-child {
+  border-bottom: none;
+}
+
+.add-cat-list li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-cat-list li button {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.add-cat-list li button:hover {
+  color: #333;
+}
+
+.add-cat-form {
+  display: flex;
+  gap: 6px;
+}
+
+.add-cat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: white;
+}
+
+.add-cat-form input:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.add-cat-form button {
+  padding: 6px 10px;
+  background: #333;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.add-cat-form button:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.add-cat-form button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

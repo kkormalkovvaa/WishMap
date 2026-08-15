@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/authSlice';
+import { setToken } from '../utils/api';
 import '../styles/Header.css';
 
 const Header = () => {
@@ -7,6 +8,7 @@ const Header = () => {
   const { user, isAuthenticated } = useSelector(state => state.auth);
 
   const handleLogout = () => {
+    setToken(null);
     dispatch(logout());
   };
 

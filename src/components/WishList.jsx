@@ -4,6 +4,7 @@ import { selectWish } from '../store/wishesSlice';
 import WishCard from './WishCard';
 import CreateWishForm from './CreateWishForm';
 import WishStats from './WishStats';
+import AddCategoryModal from './AddCategoryModal';
 import '../styles/WishList.css';
 
 const WishList = () => {
@@ -12,6 +13,7 @@ const WishList = () => {
   const { categories } = useSelector(state => state.categories);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddCategory, setShowAddCategory] = useState(false);
 
   const filteredWishes = wishes.filter(wish => {
     const matchesCategory = selectedCategory === 'all' || String(wish.categoryId) === String(selectedCategory);
@@ -48,6 +50,13 @@ const WishList = () => {
               </option>
             ))}
           </select>
+          <button
+            className="btn-add-category"
+            onClick={() => setShowAddCategory(true)}
+            title="Добавить категорию"
+          >
+            +
+          </button>
         </div>
       </div>
 
@@ -70,6 +79,10 @@ const WishList = () => {
           </div>
         )}
       </div>
+
+      {showAddCategory && (
+        <AddCategoryModal onClose={() => setShowAddCategory(false)} />
+      )}
     </div>
   );
 };

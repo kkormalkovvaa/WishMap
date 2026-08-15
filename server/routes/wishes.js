@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { authenticate } from '../middleware/auth.js';
-import Wish from '../models/Wish.js';
+import { Router } from "express";
+import { authenticate } from "../middleware/auth.js";
+import Wish from "../models/Wish.js";
 
 const router = Router();
 router.use(authenticate);
@@ -43,32 +43,32 @@ router.use(authenticate);
  *       400:
  *         description: Ошибка валидации
  */
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const wishes = await Wish.find({ userId: req.user.id }).sort({ createdAt: -1 });
-    res.json(wishes.map(w => w.toJSON()));
+    const wishes = await Wish.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
+    res.json(wishes.map((w) => w.toJSON()));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { title, description, categoryId, priority, status, deadline, progress } = req.body;
+    const { title, description, categoryId, status, deadline } = req.body;
 
     if (!title?.trim()) {
-      return res.status(400).json({ error: 'Название обязательно' });
+      return res.status(400).json({ error: "Название обязательно" });
     }
 
     const wish = await Wish.create({
       userId: req.user.id,
       title: title.trim(),
-      description: description || '',
+      description: description || "",
       categoryId: categoryId ?? null,
-      priority: priority ?? 3,
-      status: status || 'active',
+      status: status || "active",
       deadline: deadline || null,
-      progress: progress ?? 0,
     });
 
     res.status(201).json(wish.toJSON());
@@ -123,19 +123,20 @@ router.post('/', async (req, res) => {
  *       404:
  *         description: Не найдено
  */
-router.put('/:id', async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const wish = await Wish.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!wish) return res.status(404).json({ error: 'Желание не найдено' });
+    const wish = await Wish.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!wish) return res.status(404).json({ error: "Желание не найдено" });
 
-    const { title, description, categoryId, priority, status, deadline, progress } = req.body;
+    const { title, description, categoryId, status, deadline } = req.body;
     if (title !== undefined) wish.title = title.trim();
     if (description !== undefined) wish.description = description;
     if (categoryId !== undefined) wish.categoryId = categoryId;
-    if (priority !== undefined) wish.priority = priority;
     if (status !== undefined) wish.status = status;
     if (deadline !== undefined) wish.deadline = deadline || null;
-    if (progress !== undefined) wish.progress = progress;
 
     await wish.save();
     res.json(wish.toJSON());
@@ -144,11 +145,14 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const result = await Wish.deleteOne({ _id: req.params.id, userId: req.user.id });
+    const result = await Wish.deleteOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
     if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Желание не найдено' });
+      return res.status(404).json({ error: "Желание не найдено" });
     }
     res.json({ success: true });
   } catch (err) {

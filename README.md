@@ -1,16 +1,119 @@
-# React + Vite
+# Карта желаний (WishMap)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Приложение для управления личными желаниями, целями и мечтами.
 
-Currently, two official plugins are available:
+## 🚀 Функциональность
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Приветственная страница** с описанием возможностей приложения
+- **Авторизация** с регистрацией и входом через JWT
+- **Создание желаний** с настраиваемыми параметрами:
+  - Название и описание
+  - Категория (путешествия, здоровье, карьера и т.д.)
+  - Приоритет (от 1 до 5 звезд)
+  - Дедлайн
+  - Статус выполнения
+- **Категории желаний**:
+  - Путешествия
+  - Здоровье
+  - Материальное
+  - Личностный рост
+  - Карьера
+  - Отношения
+  - Хобби
+  - Другое
+- **Просмотр деталей** каждого желания в модальном окне
+- **Поиск и фильтрация** по категориям и тексту
+- **Визуализация прогресса** выполнения желаний
 
-## React Compiler
+## 🛠️ Технологический стек
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** с хуками
+- **Redux Toolkit** для управления состоянием
+- **Vite** для сборки проекта
+- **ESLint** для проверки кода
+- **CSS Modules** для стилизации
 
-## Expanding the ESLint configuration
+## 📦 Установка и запуск
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Предварительные требования
+
+- Node.js 18+
+- npm 9+
+
+### Установка зависимостей
+
+```bash
+npm install
+```
+
+### Запуск в режиме разработки
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу: [http://localhost:5173](http://localhost:5173)
+
+### Сборка для продакшена
+
+```bash
+npm run build
+```
+
+### Проверка кода (линтер)
+
+```bash
+npm run lint
+```
+
+## 📁 Структура проекта
+
+```
+src/
+├── components/           # React-компоненты
+│   ├── WelcomePage.jsx  # Приветственная страница
+│   ├── Header.jsx       # Шапка приложения
+│   ├── WishList.jsx     # Список желаний
+│   ├── WishCard.jsx     # Карточка желания
+│   ├── CreateWishForm.jsx # Форма создания желания
+│   └── WishModal.jsx    # Модальное окно с деталями
+├── store/               # Redux store
+│   ├── store.js         # Конфигурация store
+│   ├── authSlice.js     # Слайс авторизации
+│   ├── wishesSlice.js   # Слайс желаний
+│   └── categoriesSlice.js # Слайс категорий
+├── styles/              # Стили компонентов
+└── App.jsx              # Корневой компонент
+```
+
+## 🎨 Дизайн
+
+Приложение использует современный дизайн с:
+
+- Градиентными акцентами (#667eea → #764ba2)
+- Анимациями и плавными переходами
+- Адаптивным дизайном для мобильных устройств
+- Карточками с тенями и hover-эффектами
+
+## 🚀 Дальнейшее развитие
+
+Планируемые улучшения:
+
+- [x] Реальная авторизация через JWT
+- [x] Бэкенд API для хранения данных
+- [ ] Возможность делиться желаниями
+- [ ] Напоминания о дедлайнах
+- [x] Статистика выполнения желаний
+- [ ] Экспорт/импорт данных
+
+## 📄 Лицензия
+
+MIT
+
+## 👥 Автор
+
+Разработано с использованием Qwen Code
+
+---
+
+**✨ Начните свой путь к исполнению желаний прямо сейчас!**

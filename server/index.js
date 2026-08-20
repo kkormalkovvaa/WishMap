@@ -2,11 +2,13 @@ import "dotenv/config";
 
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import rateLimit from "express-rate-limit";
 
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
@@ -25,10 +27,25 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// --- Middleware ---
-app.use(cors());
-app.use(express.json());
+// --- Security & performance middleware ---
+app.use(helmet());
+
+const corsOrigin =
+  process.env.CORS_ORIGIN?.split(",").map((s) => s.trim()) || "*";
+app.use(cors({ origin: corsOrigin, credentials: true }));
+
+app.use(express.json({ limit: "10mb" }));
 app.use("/uploads", express.static(uploadsDir));
+
+// --- Rate limiter for auth routes ---
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Слишком много попыток авторизации. Повторите позже." },
+});
+app.use("/api/auth", authLimiter);
 
 // --- Swagger docs ---
 const swaggerOptions = {
@@ -65,6 +82,15 @@ app.use("/api/categories", authenticate, categoryRoutes);
 // --- Health check ---
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
+// --- Serve frontend static files in production ---
+const clientDist = path.join(__dirname, "../../dist");
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
+
 // --- Global error handler ---
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
@@ -79,7 +105,7 @@ app.use((err, req, res, _next) => {
 connectDB(process.env.MONGO_URI, process.env.DB_NAME ?? "wishmap")
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Server running on port ${PORT}`);
       console.log(`Swagger docs: http://localhost:${PORT}/api-docs`);
     });
   })

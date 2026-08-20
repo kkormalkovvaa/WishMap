@@ -1,0 +1,26 @@
+services:
+  # Backend API server
+  - type: web
+    name: wishmap-api
+    env: node
+    buildCommand: cd server && npm ci
+    startCommand: cd server && npm start
+    port: 5000
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        fromDatabase:
+          name: wishmap-db
+          property: connectionString
+      - generateKey: true
+        key: JWT_SECRET
+      - key: CORS_ORIGIN
+        sync: false
+
+databases:
+  # MongoDB Atlas cluster — provide your own connection string
+  - name: wishmap-db
+    databaseName: wishmap
+    plan: free

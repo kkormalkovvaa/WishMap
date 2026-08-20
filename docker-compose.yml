@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - server/.env
+    volumes:
+      - uploads-data:/usr/src/app/server/uploads
+    restart: unless-stopped
+
+volumes:
+  uploads-data:

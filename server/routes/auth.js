@@ -181,4 +181,149 @@ router.get("/me", authenticate, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Обновить профиль текущего пользователя
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 example: Екатерина Иванова
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: newemail@example.com
+ *     responses:
+ *       200:
+ *         description: Профиль обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Ошибка валидации
+ *       409:
+ *         description: Email уже занят
+ *       404:
+ *         description: Пользователь не найден
+ */
+router.put("/profile", authenticate, async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    if (name !== undefined && name.trim().length < 2) {
+      return res
+        .status(400)
+        .json({ error: "Имя должно содержать минимум 2 символа" });
+    }
+    if (email !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Некорректный email" });
+    }
+
+    // Check duplicate email only if email is being changed
+    if (email) {
+      const existing = await User.findOne({
+        email: email.toLowerCase(),
+        _id: { $ne: req.user.id },
+      });
+      if (existing) {
+        return res
+          .status(409)
+          .json({ error: "Пользователь с таким email уже существует" });
+      }
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "Пользователь не найден" });
+
+    if (name !== undefined) user.name = name.trim();
+    if (email !== undefined) user.email = email.toLowerCase();
+
+    await user.save();
+    res.json(user.toJSON());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/auth/password:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Изменить пароль
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: oldpass123
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: newpass456
+ *     responses:
+ *       200:
+ *         description: Пароль изменён
+ *       400:
+ *         description: Новые данные не могут совпадать со старыми
+ *       401:
+ *         description: Неверный текущий пароль
+ */
+router.put("/password", authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Текущий и новый пароль обязательны" });
+    }
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Новый пароль должен содержать минимум 6 символов" });
+    }
+    if (currentPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Новый пароль не может совпадать с текущим" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "Пользователь не найден" });
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) {
+      return res.status(401).json({ error: "Неверный текущий пароль" });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

@@ -1,3 +1,13 @@
+# Render deployment config for MongoDB Atlas
+#
+# Steps:
+# 1. Create Web Service → link this repo → select `render.yaml`
+# 2. In Environment Variables tab, set:
+#    - MONGO_URI = your Atlas connection string (from Atlas → Connect → Connect your application)
+#    - JWT_SECRET = `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+#    - CORS_ORIGIN = http://localhost:5173 (temp), then update to frontend domain after deploying it
+# 3. Deploy — health check hits /api/health
+
 services:
   # Backend API server
   - type: web
@@ -11,16 +21,8 @@ services:
       - key: PORT
         value: 5000
       - key: MONGO_URI
-        fromDatabase:
-          name: wishmap-db
-          property: connectionString
-      - generateKey: true
-        key: JWT_SECRET
+        sync: false # set manually in Render dashboard (MongoDB Atlas connection string)
+      - key: JWT_SECRET
+        sync: false # generate via `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
       - key: CORS_ORIGIN
-        sync: false
-
-databases:
-  # MongoDB Atlas cluster — provide your own connection string
-  - name: wishmap-db
-    databaseName: wishmap
-    plan: free
+        sync: false # set to your frontend domain after deployment

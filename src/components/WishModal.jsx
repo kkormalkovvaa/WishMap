@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearSelectedWish, updateWish, deleteWish } from '../store/wishesSlice';
 import '../styles/WishModal.css';
@@ -22,6 +22,9 @@ const WishModalContent = ({ wish: selectedWish }) => {
   const { categories } = useSelector(state => state.categories);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(() => buildFormData(selectedWish));
+  const [newImage, setNewImage] = useState(null);
+  const [removeImageFlag, setRemoveImageFlag] = useState(false);
+  const fileRef = useRef(null);
 
   const category = categories.find(cat => String(cat.id) === String(selectedWish.categoryId));
 
@@ -35,30 +38,71 @@ const WishModalContent = ({ wish: selectedWish }) => {
 
   const handleEdit = () => {
     setIsEditing(true);
+    setNewImage(null);
+    setRemoveImageFlag(false);
   };
 
   const handleCancelEdit = () => {
     setFormData(buildFormData(selectedWish));
+    setNewImage(null);
+    setRemoveImageFlag(false);
+    if (fileRef.current) fileRef.current.value = '';
     setIsEditing(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setNewImage(file);
+    setRemoveImageFlag(false);
+  };
+
+  const removeCurrentImage = () => {
+    setRemoveImageFlag(true);
+    setNewImage(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const removeNewImage = () => {
+    setNewImage(null);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
-    const patch = {
-      title: formData.title,
-      description: formData.description,
-      categoryId: formData.categoryId,
-      status: formData.status,
-      deadline: formData.deadline || null,
-    };
-    dispatch(updateWish({ id: selectedWish.id, ...patch }));
+    if (newImage) {
+      const fd = new FormData();
+      fd.append('title', formData.title);
+      fd.append('description', formData.description);
+      if (formData.categoryId) fd.append('categoryId', formData.categoryId);
+      fd.append('status', formData.status);
+      if (formData.deadline) fd.append('deadline', formData.deadline);
+      fd.append('image', newImage);
+      dispatch(updateWish({ id: selectedWish.id, formData: fd }));
+    } else if (removeImageFlag) {
+      const patch = {
+        title: formData.title,
+        description: formData.description,
+        categoryId: formData.categoryId || null,
+        status: formData.status,
+        deadline: formData.deadline || null,
+        removeImage: 'true',
+      };
+      dispatch(updateWish({ id: selectedWish.id, ...patch }));
+    } else {
+      const patch = {
+        title: formData.title,
+        description: formData.description,
+        categoryId: formData.categoryId || null,
+        status: formData.status,
+        deadline: formData.deadline || null,
+      };
+      dispatch(updateWish({ id: selectedWish.id, ...patch }));
+    }
     setIsEditing(false);
   };
 
@@ -70,6 +114,9 @@ const WishModalContent = ({ wish: selectedWish }) => {
   const handleStatusChange = (newStatus) => {
     dispatch(updateWish({ id: selectedWish.id, status: newStatus }));
   };
+
+  const currentImage = selectedWish.image && !removeImageFlag ? selectedWish.image : null;
+  const previewUrl = newImage ? URL.createObjectURL(newImage) : null;
 
   return (
     <div className="modal-overlay" onClick={handleClose}>
@@ -107,12 +154,7 @@ const WishModalContent = ({ wish: selectedWish }) => {
 
               <div className="form-group">
                 <label htmlFor="modal-category">Категория</label>
-                <select
-                  id="modal-category"
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
-                >
+                <select id="modal-category" name="categoryId" value={formData.categoryId} onChange={handleChange}>
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
@@ -122,32 +164,46 @@ const WishModalContent = ({ wish: selectedWish }) => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="modal-status">Статус</label>
-                  <select
-                    id="modal-status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                  >
+                  <select id="modal-status" name="status" value={formData.status} onChange={handleChange}>
                     <option value="active">Активно</option>
                     <option value="in_progress">В процессе</option>
                     <option value="completed">Выполнено</option>
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="modal-deadline">Дедлайн</label>
-                  <input
-                    type="date"
-                    id="modal-deadline"
-                    name="deadline"
-                    value={formData.deadline}
-                    onChange={handleChange}
-                  />
+                  <input type="date" id="modal-deadline" name="deadline" value={formData.deadline} onChange={handleChange} />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Изображение</label>
+                {previewUrl ? (
+                  <div className="image-preview">
+                    <img src={previewUrl} alt="" />
+                    <button type="button" className="image-remove" onClick={removeNewImage}>×</button>
+                  </div>
+                ) : currentImage ? (
+                  <div className="image-preview">
+                    <img src={currentImage} alt="" />
+                    <button type="button" className="image-remove" onClick={removeCurrentImage}>×</button>
+                  </div>
+                ) : (
+                  <label className="image-upload-btn">
+                    <span>Выбрать файл</span>
+                    <input type="file" ref={fileRef} accept="image/*" onChange={handleImageChange} hidden />
+                  </label>
+                )}
               </div>
             </div>
           ) : (
             <>
+              {selectedWish.image && (
+                <div className="modal-image">
+                  <img src={selectedWish.image} alt="" />
+                </div>
+              )}
+
               <div className="wish-info">
                 <div className="info-row">
                   <span className="info-label">Статус:</span>
@@ -166,9 +222,7 @@ const WishModalContent = ({ wish: selectedWish }) => {
                 <div className="info-row">
                   <span className="info-label">Категория:</span>
                   <span className="info-value">
-                    <span className="category-badge">
-                      {category?.name || 'Без категории'}
-                    </span>
+                    <span className="category-badge">{category?.name || 'Без категории'}</span>
                   </span>
                 </div>
 
@@ -200,31 +254,15 @@ const WishModalContent = ({ wish: selectedWish }) => {
         <div className="modal-actions">
           {isEditing ? (
             <>
-              <button className="btn btn-danger" onClick={handleDelete}>
-                Удалить
-              </button>
-              <button className="btn btn-secondary" onClick={handleCancelEdit}>
-                Отмена
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={handleSave}
-                disabled={!formData.title?.trim()}
-              >
-                Сохранить
-              </button>
+              <button className="btn btn-danger" onClick={handleDelete}>Удалить</button>
+              <button className="btn btn-secondary" onClick={handleCancelEdit}>Отмена</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={!formData.title?.trim()}>Сохранить</button>
             </>
           ) : (
             <>
-              <button className="btn btn-danger" onClick={handleDelete}>
-                Удалить
-              </button>
-              <button className="btn btn-secondary" onClick={handleClose}>
-                Закрыть
-              </button>
-              <button className="btn btn-primary" onClick={handleEdit}>
-                Редактировать
-              </button>
+              <button className="btn btn-danger" onClick={handleDelete}>Удалить</button>
+              <button className="btn btn-secondary" onClick={handleClose}>Закрыть</button>
+              <button className="btn btn-primary" onClick={handleEdit}>Редактировать</button>
             </>
           )}
         </div>
@@ -239,8 +277,6 @@ const WishModal = () => {
 
   if (!wish) return null;
 
-  // key заставляет перемонтировать контент при выборе другого желания,
-  // сбрасывая состояние формы без useEffect
   return <WishModalContent key={wish.id} wish={wish} />;
 };
 

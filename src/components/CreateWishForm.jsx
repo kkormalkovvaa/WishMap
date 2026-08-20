@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createWish } from '../store/wishesSlice';
 import '../styles/CreateWishForm.css';
@@ -13,126 +13,126 @@ const CreateWishForm = () => {
     categoryId: '',
     deadline: '',
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const [submitError, setSubmitError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
+    setSubmitting(true);
 
-    const payload = {
-      title: formData.title,
-      description: formData.description,
-      categoryId: formData.categoryId || null,
-      deadline: formData.deadline || null,
-    };
+    try {
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('title', formData.title);
+        fd.append('description', formData.description);
+        if (formData.categoryId) fd.append('categoryId', formData.categoryId);
+        if (formData.deadline) fd.append('deadline', formData.deadline);
+        fd.append('image', imageFile);
+        await dispatch(createWish(fd)).unwrap();
+      } else {
+        await dispatch(createWish({
+          title: formData.title,
+          description: formData.description,
+          categoryId: formData.categoryId || null,
+          deadline: formData.deadline || null,
+        })).unwrap();
+      }
 
-    dispatch(createWish(payload));
-
-    // Сброс формы
-    setFormData({
-      title: '',
-      description: '',
-      categoryId: '',
-      deadline: '',
-    });
-    setIsOpen(false);
+      setFormData({ title: '', description: '', categoryId: '', deadline: '' });
+      setImageFile(null);
+      setImagePreview(null);
+      if (fileRef.current) fileRef.current.value = '';
+      setIsOpen(false);
+    } catch (err) {
+      console.error('Create wish error:', err);
+      setSubmitError(typeof err === 'string' ? err : 'Ошибка при создании желания');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className="create-wish-form">
       {!isOpen ? (
-        <button 
-          className="btn-open-form"
-          onClick={() => setIsOpen(true)}
-        >
+        <button className="btn-open-form" onClick={() => setIsOpen(true)}>
           <span>+</span> Добавить желание
         </button>
       ) : (
         <form className="wish-form" onSubmit={handleSubmit}>
           <div className="form-header">
             <h3>Новое желание</h3>
-            <button 
-              type="button"
-              className="btn-close"
-              onClick={() => setIsOpen(false)}
-            >
-              ×
-            </button>
+            <button type="button" className="btn-close" onClick={() => setIsOpen(false)}>×</button>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="title">Название желания *</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Чего вы хотите достичь?"
-              required
-            />
+            <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} placeholder="Чего вы хотите достичь?" required />
           </div>
 
           <div className="form-group">
             <label htmlFor="description">Описание</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Подробно опишите своё желание..."
-              rows="3"
-            />
+            <textarea id="description" name="description" value={formData.description} onChange={handleChange} placeholder="Подробно опишите своё желание..." rows="3" />
           </div>
 
           <div className="form-group">
             <label htmlFor="categoryId">Категория</label>
-            <select
-              id="categoryId"
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleChange}
-            >
+            <select id="categoryId" name="categoryId" value={formData.categoryId} onChange={handleChange}>
               <option value="">Выберите категорию</option>
               {categories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
+                <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
             <label htmlFor="deadline">Дедлайн (опционально)</label>
-            <input
-              type="date"
-              id="deadline"
-              name="deadline"
-              value={formData.deadline}
-              onChange={handleChange}
-            />
+            <input type="date" id="deadline" name="deadline" value={formData.deadline} onChange={handleChange} />
           </div>
 
+          <div className="form-group">
+            <label>Изображение</label>
+            {imagePreview ? (
+              <div className="image-preview">
+                <img src={imagePreview} alt="" />
+                <button type="button" className="image-remove" onClick={removeImage}>×</button>
+              </div>
+            ) : (
+              <label className="image-upload-btn">
+                <span>Выбрать файл</span>
+                <input type="file" ref={fileRef} accept="image/*" onChange={handleImageChange} hidden />
+              </label>
+            )}
+          </div>
+
+          {submitError && <div className="form-error">{submitError}</div>}
+
           <div className="form-actions">
-            <button 
-              type="button"
-              className="btn-cancel"
-              onClick={() => setIsOpen(false)}
-            >
-              Отмена
-            </button>
-            <button 
-              type="submit"
-              className="btn-submit"
-              disabled={!formData.title.trim()}
-            >
-              Создать желание
+            <button type="button" className="btn-cancel" onClick={() => setIsOpen(false)}>Отмена</button>
+            <button type="submit" className="btn-submit" disabled={!formData.title.trim() || submitting}>
+              {submitting ? 'Создание...' : 'Создать желание'}
             </button>
           </div>
         </form>

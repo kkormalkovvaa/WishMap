@@ -6,10 +6,23 @@
   cursor: pointer;
   transition: box-shadow 0.2s ease;
   border: 1px solid #e0e0e0;
+  overflow: hidden;
 }
 
 .wish-card:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.wish-card-image {
+  margin: -16px -16px 12px;
+  height: 140px;
+  overflow: hidden;
+}
+
+.wish-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .wish-card-header {

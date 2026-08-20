@@ -1,10 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { api } from "../utils/api";
+import { api, uploadPost, uploadPut } from "../utils/api";
 import { logout as authLogout } from "./authSlice";
-
-// ------------------------------------------------------------------
-// Async thunks
-// ------------------------------------------------------------------
 
 export const fetchWishes = createAsyncThunk("wishes/fetchWishes", async () => {
   const data = await api.get("/wishes");
@@ -15,6 +11,9 @@ export const createWish = createAsyncThunk(
   "wishes/createWish",
   async (payload, { rejectWithValue }) => {
     try {
+      if (payload instanceof FormData) {
+        return await uploadPost("/wishes", payload);
+      }
       const data = await api.post("/wishes", payload);
       return data;
     } catch (err) {
@@ -27,6 +26,9 @@ export const updateWish = createAsyncThunk(
   "wishes/updateWish",
   async ({ id, ...patch }, { rejectWithValue }) => {
     try {
+      if (patch.formData instanceof FormData) {
+        return await uploadPut(`/wishes/${id}`, patch.formData);
+      }
       const data = await api.put(`/wishes/${id}`, patch);
       return data;
     } catch (err) {

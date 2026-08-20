@@ -19,7 +19,12 @@ export function setToken(token) {
  */
 async function request(path, options = {}) {
   const url = `/api${path}`;
-  const headers = { "Content-Type": "application/json", ...options.headers };
+  const headers = { ...options.headers };
+
+  // Only set Content-Type to JSON if body is present and not FormData
+  if (options.body && !(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const token = getToken();
   if (token) {
@@ -53,6 +58,42 @@ export const api = {
     return request(path, { method: "DELETE" }).then(() => true);
   },
 };
+
+export async function uploadPost(path, formData) {
+  const token = getToken();
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(`/api${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  return await response.json();
+}
+
+export async function uploadPut(path, formData) {
+  const token = getToken();
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const response = await fetch(`/api${path}`, {
+    method: "PUT",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  return await response.json();
+}
 
 // --- Auth API calls ---
 

@@ -17,6 +17,7 @@ const wishSchema = new Schema(
       default: "active",
     },
     deadline: { type: Date, default: null },
+    image: { type: String, default: null },
   },
   { timestamps: true },
 );

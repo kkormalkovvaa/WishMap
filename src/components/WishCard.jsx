@@ -26,6 +26,11 @@ const WishCard = ({ wish, onClick }) => {
 
   return (
     <div className="wish-card" onClick={onClick}>
+      {wish.image && (
+        <div className="wish-card-image">
+          <img src={wish.image} alt="" />
+        </div>
+      )}
       <div className="wish-card-header">
         <div className="category-badge">
           {category?.name || 'Без категории'}

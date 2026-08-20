@@ -65,6 +65,58 @@ const swaggerOptions = {
           bearerFormat: "JWT",
         },
       },
+      schemas: {
+        Wish: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            userId: { type: "string" },
+            title: { type: "string" },
+            description: { type: "string" },
+            categoryId: { type: "string", nullable: true },
+            status: {
+              type: "string",
+              enum: ["active", "in_progress", "completed"],
+            },
+            deadline: { type: "string", format: "date-time", nullable: true },
+            image: { type: "string", nullable: true },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
+        WishInput: {
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: { type: "string" },
+            description: { type: "string" },
+            categoryId: { type: "string" },
+            status: {
+              type: "string",
+              enum: ["active", "in_progress", "completed"],
+            },
+            deadline: { type: "string", format: "date-time" },
+          },
+        },
+        Category: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            color: { type: "string" },
+            userId: { type: "string" },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        CategoryInput: {
+          type: "object",
+          required: ["name"],
+          properties: {
+            name: { type: "string" },
+            color: { type: "string" },
+          },
+        },
+      },
     },
     security: [{ bearerAuth: [] }],
   },

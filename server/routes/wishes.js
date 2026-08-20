@@ -58,6 +58,62 @@ function handleUpload(req, res, next) {
 
 const router = Router();
 
+/**
+ * @swagger
+ * /api/wishes:
+ *   get:
+ *     tags: [Wishes]
+ *     summary: Получить все желания пользователя
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список желаний
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Wish'
+ *   post:
+ *     tags: [Wishes]
+ *     summary: Создать желание
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Название желания (обязательно)
+ *               description:
+ *                 type: string
+ *                 description: Описание
+ *               categoryId:
+ *                 type: string
+ *                 description: ObjectId категории
+ *               status:
+ *                 type: string
+ *                 enum: [active, in_progress, completed]
+ *               deadline:
+ *                 type: string
+ *                 format: date-time
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Изображение (до 5 МБ)
+ *     responses:
+ *       201:
+ *         description: Желание создано
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Wish'
+ */
 router.get("/", authenticate, async (req, res) => {
   try {
     const wishes = await Wish.find({ userId: req.user.id }).sort({
@@ -93,6 +149,72 @@ router.post("/", authenticate, handleUpload, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/wishes/{id}:
+ *   put:
+ *     tags: [Wishes]
+ *     summary: Обновить желание
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [active, in_progress, completed]
+ *               deadline:
+ *                 type: string
+ *                 format: date-time
+ *               removeImage:
+ *                 type: string
+ *                 description: 'true' для удаления изображения
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Новое изображение (до 5 МБ)
+ *     responses:
+ *       200:
+ *         description: Желание обновлено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Wish'
+ *       404:
+ *         description: Не найдено
+ *   delete:
+ *     tags: [Wishes]
+ *     summary: Удалить желание
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Желание удалено
+ *       404:
+ *         description: Не найдено
+ */
 router.put("/:id", authenticate, handleUpload, async (req, res) => {
   try {
     const wish = await Wish.findOne({

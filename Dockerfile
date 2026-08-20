@@ -27,6 +27,9 @@ WORKDIR /usr/src/app
 COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci --omit=dev
 
+# Copy server source code
+COPY server/ ./server/
+
 # Serve built frontend files
 COPY --from=builder /app/dist ./dist
 

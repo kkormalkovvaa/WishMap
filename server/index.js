@@ -42,7 +42,8 @@ const corsOrigins = process.env.CORS_ORIGIN
   : ["http://localhost:5174", "http://localhost:5173"];
 
 // Always allow Swagger UI origin
-corsOrigins.push("http://localhost:5000");
+// corsOrigins.push("http://localhost:5000");
+corsOrigins.push("https://wishmap-ogk2.onrender.com");
 
 app.use(cors({ origin: corsOrigins, credentials: true }));
 
@@ -68,7 +69,13 @@ const swaggerOptions = {
       version: "1.0.0",
       description: "API для управления желаниями",
     },
-    servers: [{ url: "http://localhost:5000" }],
+    servers: [
+      {
+        url: process.env.BASE_URL || "http://localhost:5000",
+        description: "Сервер",
+      },
+    ],
+    // servers: [{ url: "http://localhost:5000" }],
     components: {
       securitySchemes: {
         bearerAuth: {

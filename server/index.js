@@ -28,11 +28,23 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // --- Security & performance middleware ---
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use((req, res, next) => {
+  // Remove default Strict-Transport-Security for local dev to avoid mixed-content issues
+  if (process.env.NODE_ENV !== "production") {
+    res.removeHeader("strict-transport-security");
+  }
+  next();
+});
 
-const corsOrigin =
-  process.env.CORS_ORIGIN?.split(",").map((s) => s.trim()) || "*";
-app.use(cors({ origin: corsOrigin, credentials: true }));
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+  : ["http://localhost:5174", "http://localhost:5173"];
+
+// Always allow Swagger UI origin
+corsOrigins.push("http://localhost:5000");
+
+app.use(cors({ origin: corsOrigins, credentials: true }));
 
 app.use(express.json({ limit: "10mb" }));
 app.use("/uploads", express.static(uploadsDir));
@@ -116,15 +128,33 @@ const swaggerOptions = {
             color: { type: "string" },
           },
         },
+        User: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            email: { type: "string", format: "email" },
+            createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
+          },
+        },
       },
     },
     security: [{ bearerAuth: [] }],
   },
-  apis: ["./server/routes/*.js"],
+  apis: [path.join(__dirname, "routes", "*.js").replace(/\\/g, "/")],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocs, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  }),
+);
 
 // --- Routes ---
 app.use("/api/auth", authRoutes);

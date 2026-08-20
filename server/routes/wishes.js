@@ -184,7 +184,7 @@ router.post("/", authenticate, handleUpload, async (req, res) => {
  *                 format: date-time
  *               removeImage:
  *                 type: string
- *                 description: 'true' для удаления изображения
+ *                 description: 'передавайте true, чтобы удалить изображение'
  *               image:
  *                 type: string
  *                 format: binary

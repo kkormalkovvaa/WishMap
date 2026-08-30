@@ -6,6 +6,7 @@ import helmet from "helmet";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 import rateLimit from "express-rate-limit";
@@ -186,7 +187,16 @@ app.use("/api/wishes", wishRoutes);
 app.use("/api/categories", authenticate, categoryRoutes);
 
 // --- Health check ---
-app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+app.get("/api/health", async (_req, res) => {
+  let dbStatus = "unknown";
+  try {
+    dbStatus =
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+  } catch (err) {
+    dbStatus = "error";
+  }
+  res.json({ status: "ok", db: dbStatus, time: new Date().toISOString() });
+});
 
 // --- Serve frontend static files in production ---
 const clientDist = path.join(__dirname, "../../dist");
@@ -201,10 +211,17 @@ if (fs.existsSync(clientDist)) {
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
   console.error("Unhandled error:", err.message);
+  if (err.stack) {
+    console.error(err.stack);
+  }
   const status = err.status || err.statusCode || 500;
-  res.status(status).json({
+  const response = {
     error: err.message || "Внутренняя ошибка сервера",
-  });
+  };
+  if (process.env.NODE_ENV !== "production" && err.stack) {
+    response.stack = err.stack;
+  }
+  res.status(status).json(response);
 });
 
 // --- Start ---

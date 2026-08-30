@@ -2,9 +2,18 @@ import mongoose from "mongoose";
 
 export async function connectDB(uri, dbName) {
   if (!uri || uri.includes("<")) {
-    console.warn("MONGO_URI not configured — using in-memory fallback.");
-    return;
+    throw new Error(
+      "MONGO_URI is not configured or contains placeholder values",
+    );
   }
+
+  mongoose.connection.on("error", (err) => {
+    console.error("MongoDB connection error:", err.message);
+  });
+
+  mongoose.connection.on("disconnected", () => {
+    console.warn("MongoDB disconnected");
+  });
 
   try {
     await mongoose.connect(uri, {
@@ -16,7 +25,7 @@ export async function connectDB(uri, dbName) {
     });
     console.log("MongoDB connected");
   } catch (err) {
-    console.error("MongoDB connection error:", err.message);
+    console.error("MongoDB connection failed:", err.message);
     process.exit(1);
   }
 }

@@ -1,41 +1,49 @@
 .wish-stats {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stats-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .stat-card {
   flex: 1;
   background: #fff;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 16px;
   text-align: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .stat-icon {
-  font-size: 16px;
-  margin-bottom: 2px;
+  font-size: 20px;
+  margin-bottom: 4px;
 }
 
 .stat-value {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   line-height: 1.2;
-  color: #333;
+  color: #1f2937;
 }
 
 .stat-label {
-  font-size: 11px;
-  color: #999;
-  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .total-value {
-  color: #333;
+  color: #667eea;
 }
 
 @media (max-width: 768px) {

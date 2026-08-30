@@ -60,10 +60,10 @@
 
 .add-cat-list li {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 2px;
-  font-size: 0.85rem;
+  gap: 8px;
+  padding: 8px 2px;
+  font-size: 0.9rem;
   color: #444;
   border-bottom: 1px solid #f5f5f5;
 }
@@ -72,10 +72,18 @@
   border-bottom: none;
 }
 
-.add-cat-list li span {
+.add-cat-list li > span:nth-child(2) {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cat-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .add-cat-list li button {
@@ -96,44 +104,66 @@
 
 .add-cat-form {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.add-cat-form input {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.85rem;
+.add-cat-form > input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
   font-family: inherit;
   background: white;
 }
 
-.add-cat-form input:focus {
+.add-cat-form > input:focus {
   outline: none;
-  border-color: #555;
+  border-color: #667eea;
 }
 
-.add-cat-form button {
-  padding: 6px 10px;
-  background: #333;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 500;
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.color-option {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
   cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.selected {
+  border-color: #1f2937;
+  transform: scale(1.15);
+}
+
+.add-cat-form > button {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: opacity 0.2s;
 }
 
-.add-cat-form button:hover:not(:disabled) {
-  opacity: 0.85;
+.add-cat-form > button:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
-.add-cat-form button:disabled {
+.add-cat-form > button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

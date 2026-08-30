@@ -1,94 +1,103 @@
 .wish-list-container {
-  max-width: 960px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 28px;
 }
 
 .wish-list-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .wish-list-header h2 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 16px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 18px;
 }
 
 .controls {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .search-input {
   flex: 1;
-  padding: 8px 14px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
   background: white;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-input:focus {
-  border-color: #555;
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .category-select {
-  padding: 8px 14px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
   background: white;
   cursor: pointer;
-  min-width: 160px;
+  min-width: 180px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .category-select:focus {
-  border-color: #555;
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .btn-add-category {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #f5f5f5;
-  color: #555;
-  font-size: 1.1rem;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  color: #667eea;
+  font-size: 1.4rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .btn-add-category:hover {
-  background: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-color: #333;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .wishes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
   margin-top: 20px;
 }
 
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 40px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  color: #999;
+  padding: 48px;
+  background: white;
+  border-radius: 16px;
+  color: #9ca3af;
+  border: 2px dashed #e5e7eb;
 }
 
 .empty-state p {
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {

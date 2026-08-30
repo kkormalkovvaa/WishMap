@@ -2,9 +2,9 @@ import { useSelector } from 'react-redux';
 import '../styles/WishCard.css';
 
 const STATUS_SHADE = {
-  active: '#888',
-  in_progress: '#666',
-  completed: '#333',
+  active: '#3b82f6',
+  in_progress: '#f59e0b',
+  completed: '#22c55e',
 };
 
 const WishCard = ({ wish, onClick }) => {
@@ -32,7 +32,10 @@ const WishCard = ({ wish, onClick }) => {
         </div>
       )}
       <div className="wish-card-header">
-        <div className="category-badge">
+        <div
+          className="category-badge"
+          style={{ backgroundColor: category?.color || '#9ca3af' }}
+        >
           {category?.name || 'Без категории'}
         </div>
         {getStatusLabel(wish.status) && (

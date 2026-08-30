@@ -22,6 +22,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+console.log("Environment PORT:", process.env.PORT);
+console.log("Environment MONGO_URI set:", Boolean(process.env.MONGO_URI));
+console.log("Environment BASE_URL:", process.env.BASE_URL || "not set");
+
 // --- Ensure uploads directory exists ---
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {

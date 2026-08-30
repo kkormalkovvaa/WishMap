@@ -80,14 +80,18 @@
 
 .modal-image {
   margin: -20px -20px 16px;
-  max-height: 240px;
+  max-height: 360px;
   overflow: hidden;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-image img {
-  width: 100%;
-  max-height: 240px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 360px;
+  object-fit: contain;
 }
 
 .wish-info {
@@ -123,14 +127,14 @@
 
 .status-badge,
 .category-badge {
-  padding: 3px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: white;
   display: inline-block;
   width: auto;
-  background: #777;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .description-section {

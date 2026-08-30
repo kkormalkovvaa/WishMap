@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 export async function connectDB(uri, dbName) {
   if (!uri || uri.includes("<")) {
+    console.error("MONGO_URI value:", uri);
     throw new Error(
       "MONGO_URI is not configured or contains placeholder values",
     );

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
+import sharp from "sharp";
 import { Types } from "mongoose";
 import { authenticate } from "../middleware/auth.js";
 import Wish from "../models/Wish.js";
@@ -54,6 +56,32 @@ function handleUpload(req, res, next) {
     }
     next();
   });
+}
+
+// Compress uploaded images so they load quickly but remain fully visible
+async function compressImage(req, res, next) {
+  if (!req.file) return next();
+
+  try {
+    const inputPath = req.file.path;
+    const outputFilename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const outputPath = path.join(path.dirname(inputPath), outputFilename);
+
+    await sharp(inputPath)
+      .rotate()
+      .resize({ width: 1200, height: 1200, fit: "inside" })
+      .jpeg({ quality: 80, progressive: true })
+      .toFile(outputPath);
+
+    fs.unlinkSync(inputPath);
+
+    req.file.filename = outputFilename;
+    req.file.path = outputPath;
+    next();
+  } catch (err) {
+    console.error("Image compression error:", err.message);
+    next(err);
+  }
 }
 
 const router = Router();
@@ -125,29 +153,35 @@ router.get("/", authenticate, async (req, res) => {
   }
 });
 
-router.post("/", authenticate, handleUpload, async (req, res) => {
-  try {
-    const { title, description, categoryId, status, deadline } = req.body;
+router.post(
+  "/",
+  authenticate,
+  handleUpload,
+  compressImage,
+  async (req, res) => {
+    try {
+      const { title, description, categoryId, status, deadline } = req.body;
 
-    if (!title?.trim()) {
-      return res.status(400).json({ error: "Название обязательно" });
+      if (!title?.trim()) {
+        return res.status(400).json({ error: "Название обязательно" });
+      }
+
+      const wish = await Wish.create({
+        userId: req.user.id,
+        title: title.trim(),
+        description: description || "",
+        categoryId: cleanCategoryId(categoryId),
+        status: status || "active",
+        deadline: deadline || null,
+        image: req.file ? `/uploads/${req.file.filename}` : null,
+      });
+
+      res.status(201).json(wish.toJSON());
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-
-    const wish = await Wish.create({
-      userId: req.user.id,
-      title: title.trim(),
-      description: description || "",
-      categoryId: cleanCategoryId(categoryId),
-      status: status || "active",
-      deadline: deadline || null,
-      image: req.file ? `/uploads/${req.file.filename}` : null,
-    });
-
-    res.status(201).json(wish.toJSON());
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  },
+);
 
 /**
  * @swagger
@@ -215,30 +249,37 @@ router.post("/", authenticate, handleUpload, async (req, res) => {
  *       404:
  *         description: Не найдено
  */
-router.put("/:id", authenticate, handleUpload, async (req, res) => {
-  try {
-    const wish = await Wish.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
-    if (!wish) return res.status(404).json({ error: "Желание не найдено" });
+router.put(
+  "/:id",
+  authenticate,
+  handleUpload,
+  compressImage,
+  async (req, res) => {
+    try {
+      const wish = await Wish.findOne({
+        _id: req.params.id,
+        userId: req.user.id,
+      });
+      if (!wish) return res.status(404).json({ error: "Желание не найдено" });
 
-    const { title, description, categoryId, status, deadline, removeImage } =
-      req.body;
-    if (title !== undefined) wish.title = title.trim();
-    if (description !== undefined) wish.description = description;
-    if (categoryId !== undefined) wish.categoryId = cleanCategoryId(categoryId);
-    if (status !== undefined) wish.status = status;
-    if (deadline !== undefined) wish.deadline = deadline || null;
-    if (req.file) wish.image = `/uploads/${req.file.filename}`;
-    else if (removeImage === "true") wish.image = null;
+      const { title, description, categoryId, status, deadline, removeImage } =
+        req.body;
+      if (title !== undefined) wish.title = title.trim();
+      if (description !== undefined) wish.description = description;
+      if (categoryId !== undefined)
+        wish.categoryId = cleanCategoryId(categoryId);
+      if (status !== undefined) wish.status = status;
+      if (deadline !== undefined) wish.deadline = deadline || null;
+      if (req.file) wish.image = `/uploads/${req.file.filename}`;
+      else if (removeImage === "true") wish.image = null;
 
-    await wish.save();
-    res.json(wish.toJSON());
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+      await wish.save();
+      res.json(wish.toJSON());
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
 
 router.delete("/:id", authenticate, async (req, res) => {
   try {

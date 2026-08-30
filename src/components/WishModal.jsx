@@ -12,9 +12,9 @@ const buildFormData = (wish) => ({
 });
 
 const STATUS_SHADE = {
-  active: '#888',
-  in_progress: '#666',
-  completed: '#333',
+  active: '#3b82f6',
+  in_progress: '#f59e0b',
+  completed: '#22c55e',
 };
 
 const WishModalContent = ({ wish: selectedWish }) => {
@@ -222,7 +222,12 @@ const WishModalContent = ({ wish: selectedWish }) => {
                 <div className="info-row">
                   <span className="info-label">Категория:</span>
                   <span className="info-value">
-                    <span className="category-badge">{category?.name || 'Без категории'}</span>
+                    <span
+                      className="category-badge"
+                      style={{ backgroundColor: category?.color || '#9ca3af' }}
+                    >
+                      {category?.name || 'Без категории'}
+                    </span>
                   </span>
                 </div>
 

@@ -26,3 +26,5 @@ services:
         sync: false # generate via `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
       - key: CORS_ORIGIN
         sync: false # set to your frontend domain after deployment
+      - key: BASE_URL
+        sync: false # set to your Render service URL (e.g. https://wishmap-1.onrender.com)

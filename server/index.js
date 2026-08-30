@@ -41,9 +41,14 @@ const corsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
   : ["http://localhost:5174", "http://localhost:5173"];
 
-// Always allow Swagger UI origin
-// corsOrigins.push("http://localhost:5000");
-corsOrigins.push("https://wishmap-ogk2.onrender.com");
+// Always allow the API server itself so the Swagger UI can send requests from the same origin
+corsOrigins.push(`http://localhost:${PORT}`);
+
+// Also allow the configured public/base URL if present (avoids CORS when testing the deployed API)
+const publicUrl = process.env.BASE_URL || process.env.RENDER_EXTERNAL_URL;
+if (publicUrl) {
+  corsOrigins.push(publicUrl.trim());
+}
 
 app.use(cors({ origin: corsOrigins, credentials: true }));
 
@@ -71,9 +76,17 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.BASE_URL || "http://localhost:5000",
-        description: "Сервер",
+        url: `http://localhost:${PORT}`,
+        description: "Локальный сервер",
       },
+      ...(publicUrl
+        ? [
+            {
+              url: publicUrl.trim(),
+              description: "Production сервер",
+            },
+          ]
+        : []),
     ],
     // servers: [{ url: "http://localhost:5000" }],
     components: {

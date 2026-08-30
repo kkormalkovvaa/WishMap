@@ -12,13 +12,24 @@ export function setToken(token) {
   }
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
+/**
+ * Build a full URL for an uploaded image path.
+ */
+export function getImageUrl(path) {
+  if (!path) return "";
+  if (path.startsWith("http")) return path;
+  return `${API_BASE}${path}`;
+}
+
 /**
  * Make a fetch call to the backend API.
  * Automatically attaches Authorization header when a token exists.
  * Falls back gracefully when the server is unreachable (demo mode).
  */
 async function request(path, options = {}) {
-  const url = `/api${path}`;
+  const url = `${API_BASE}/api${path}`;
   const headers = { ...options.headers };
 
   // Only set Content-Type to JSON if body is present and not FormData
@@ -64,7 +75,7 @@ export async function uploadPost(path, formData) {
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${API_BASE}/api${path}`, {
     method: "POST",
     headers,
     body: formData,
@@ -82,7 +93,7 @@ export async function uploadPut(path, formData) {
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await fetch(`/api${path}`, {
+  const response = await fetch(`${API_BASE}/api${path}`, {
     method: "PUT",
     headers,
     body: formData,

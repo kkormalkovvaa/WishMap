@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { getImageUrl } from '../utils/api.js';
 import '../styles/WishCard.css';
 
 const STATUS_SHADE = {
@@ -28,7 +29,7 @@ const WishCard = ({ wish, onClick }) => {
     <div className="wish-card" onClick={onClick}>
       {wish.image && (
         <div className="wish-card-image">
-          <img src={wish.image} alt="" />
+          <img src={getImageUrl(wish.image)} alt="" />
         </div>
       )}
       <div className="wish-card-header">

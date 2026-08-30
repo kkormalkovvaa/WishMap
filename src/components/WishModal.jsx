@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { clearSelectedWish, updateWish, deleteWish } from '../store/wishesSlice';
+import { getImageUrl } from '../utils/api.js';
 import '../styles/WishModal.css';
 
 const buildFormData = (wish) => ({
@@ -185,7 +186,7 @@ const WishModalContent = ({ wish: selectedWish }) => {
                   </div>
                 ) : currentImage ? (
                   <div className="image-preview">
-                    <img src={currentImage} alt="" />
+                    <img src={getImageUrl(currentImage)} alt="" />
                     <button type="button" className="image-remove" onClick={removeCurrentImage}>×</button>
                   </div>
                 ) : (
@@ -200,7 +201,7 @@ const WishModalContent = ({ wish: selectedWish }) => {
             <>
               {selectedWish.image && (
                 <div className="modal-image">
-                  <img src={selectedWish.image} alt="" />
+                  <img src={getImageUrl(selectedWish.image)} alt="" />
                 </div>
               )}
 

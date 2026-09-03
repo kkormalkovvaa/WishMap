@@ -12,7 +12,11 @@ export const DEFAULT_CATEGORIES = [
 ];
 
 export async function seedDefaultCategories(userId) {
+  console.log("seedDefaultCategories — userId:", userId);
   const count = await Category.countDocuments({ userId });
+  console.log("seedDefaultCategories — existing count:", count);
   if (count > 0) return;
-  await Category.insertMany(DEFAULT_CATEGORIES.map(c => ({ ...c, userId })));
+  const cats = DEFAULT_CATEGORIES.map((c) => ({ ...c, userId }));
+  console.log("seedDefaultCategories — inserting:", cats);
+  await Category.insertMany(cats);
 }

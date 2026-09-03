@@ -44,10 +44,19 @@ router.use(authenticate);
  */
 router.get("/", async (req, res) => {
   try {
+    console.log("GET /api/categories — req.user.id:", req.user.id);
     await seedDefaultCategories(req.user.id);
     const categories = await Category.find({ userId: req.user.id }).sort({
       createdAt: 1,
     });
+    console.log(
+      "GET /api/categories — returning:",
+      categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        userId: c.userId.toString(),
+      })),
+    );
     res.json(categories.map((c) => c.toJSON()));
   } catch (err) {
     res.status(500).json({ error: err.message });

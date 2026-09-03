@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { logout as authLogout } from "./authSlice.js";
 import { api } from "../utils/api";
 
 export const fetchCategories = createAsyncThunk(
@@ -107,6 +108,11 @@ const categoriesSlice = createSlice({
       .addCase(deleteCategory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(authLogout, (state) => {
+        state.categories = [];
+        state.loading = false;
+        state.error = null;
       });
   },
 });

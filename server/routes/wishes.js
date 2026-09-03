@@ -1,8 +1,5 @@
 import { Router } from "express";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 import sharp from "sharp";
 import { Types } from "mongoose";
 import { authenticate } from "../middleware/auth.js";
@@ -15,18 +12,8 @@ function cleanCategoryId(val) {
   return val;
 }
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, "../uploads"),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`);
-  },
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/")) cb(null, true);
@@ -58,25 +45,20 @@ function handleUpload(req, res, next) {
   });
 }
 
-// Compress uploaded images so they load quickly but remain fully visible
+// Compress uploaded images in memory so they load quickly but remain fully visible
 async function compressImage(req, res, next) {
   if (!req.file) return next();
 
   try {
-    const inputPath = req.file.path;
-    const outputFilename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-    const outputPath = path.join(path.dirname(inputPath), outputFilename);
-
-    await sharp(inputPath)
+    const compressedBuffer = await sharp(req.file.buffer)
       .rotate()
       .resize({ width: 1200, height: 1200, fit: "inside" })
       .jpeg({ quality: 80, progressive: true })
-      .toFile(outputPath);
+      .toBuffer();
 
-    fs.unlinkSync(inputPath);
-
-    req.file.filename = outputFilename;
-    req.file.path = outputPath;
+    req.file.buffer = compressedBuffer;
+    req.file.mimetype = "image/jpeg";
+    req.file.originalname = `${Date.now()}.jpg`;
     next();
   } catch (err) {
     console.error("Image compression error:", err.message);
@@ -154,13 +136,9 @@ router.get("/", authenticate, async (req, res) => {
 });
 
 function fileToBase64(file) {
-  if (!file) return null;
-  const data = fs.readFileSync(file.path);
-  const mime =
-    path.extname(file.originalname).toLowerCase() === ".png"
-      ? "image/png"
-      : "image/jpeg";
-  return `data:${mime};base64,${data.toString("base64")}`;
+  if (!file || !file.buffer) return null;
+  const mime = file.mimetype || "image/jpeg";
+  return `data:${mime};base64,${file.buffer.toString("base64")}`;
 }
 
 router.post(
@@ -179,9 +157,6 @@ router.post(
       let image = null;
       if (req.file) {
         image = fileToBase64(req.file);
-        try {
-          fs.unlinkSync(req.file.path);
-        } catch {}
       }
 
       const wish = await Wish.create({
@@ -290,9 +265,6 @@ router.put(
       if (deadline !== undefined) wish.deadline = deadline || null;
       if (req.file) {
         wish.image = fileToBase64(req.file);
-        try {
-          fs.unlinkSync(req.file.path);
-        } catch {}
       } else if (removeImage === "true") {
         wish.image = null;
       }

@@ -1,33 +1,5 @@
 import { registerUser as apiRegister, loginUser as apiLogin } from "./api.js";
 
-const USERS_KEY = "wishmap_users";
-const LOCAL_SALT = "wishmap_local_v1";
-
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + LOCAL_SALT);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-// --- Local storage helpers (offline fallback) ---
-
-function getUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-// --- Server-aware auth functions ---
-
 export async function registerUser({ name, email, password }) {
   // Try server first
   try {
@@ -38,29 +10,10 @@ export async function registerUser({ name, email, password }) {
       email: result.user.email,
       token: result.token,
     };
-  } catch {
-    // Fallback to localStorage for offline mode
-    const users = getUsers();
-    const existing = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase(),
-    );
-    if (existing) {
-      throw new Error("Пользователь с таким email уже существует");
-    }
-
-    const passwordHash = await hashPassword(password);
-    const newUser = {
-      id: Date.now(),
-      name,
-      email,
-      passwordHash,
-      createdAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    return { id: newUser.id, name: newUser.name, email: newUser.email };
+  } catch (err) {
+    // Rethrow server errors so the UI can display them
+    // (localStorage fallback removed — on production the server should always be reachable)
+    throw err;
   }
 }
 
@@ -74,23 +27,9 @@ export async function loginUser({ email, password }) {
       email: result.user.email,
       token: result.token,
     };
-  } catch {
-    // Fallback to localStorage for offline mode
-    const users = getUsers();
-    const user = users.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase(),
-    );
-
-    if (!user) {
-      throw new Error("Пользователь не найден");
-    }
-
-    const passwordHash = await hashPassword(password);
-    if (user.passwordHash !== passwordHash) {
-      throw new Error("Неверный пароль");
-    }
-
-    return { id: user.id, name: user.name, email: user.email };
+  } catch (err) {
+    // Rethrow server errors so the UI can display them
+    throw err;
   }
 }
 

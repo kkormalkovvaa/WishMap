@@ -42,10 +42,16 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    // Network error (CORS, offline, DNS, etc.)
+    throw new Error("Не удалось подключиться к серверу. Проверьте соединение.");
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));

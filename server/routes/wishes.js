@@ -153,6 +153,16 @@ router.get("/", authenticate, async (req, res) => {
   }
 });
 
+function fileToBase64(file) {
+  if (!file) return null;
+  const data = fs.readFileSync(file.path);
+  const mime =
+    path.extname(file.originalname).toLowerCase() === ".png"
+      ? "image/png"
+      : "image/jpeg";
+  return `data:${mime};base64,${data.toString("base64")}`;
+}
+
 router.post(
   "/",
   authenticate,
@@ -166,6 +176,14 @@ router.post(
         return res.status(400).json({ error: "Название обязательно" });
       }
 
+      let image = null;
+      if (req.file) {
+        image = fileToBase64(req.file);
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {}
+      }
+
       const wish = await Wish.create({
         userId: req.user.id,
         title: title.trim(),
@@ -173,7 +191,7 @@ router.post(
         categoryId: cleanCategoryId(categoryId),
         status: status || "active",
         deadline: deadline || null,
-        image: req.file ? `/uploads/${req.file.filename}` : null,
+        image,
       });
 
       res.status(201).json(wish.toJSON());
@@ -270,8 +288,14 @@ router.put(
         wish.categoryId = cleanCategoryId(categoryId);
       if (status !== undefined) wish.status = status;
       if (deadline !== undefined) wish.deadline = deadline || null;
-      if (req.file) wish.image = `/uploads/${req.file.filename}`;
-      else if (removeImage === "true") wish.image = null;
+      if (req.file) {
+        wish.image = fileToBase64(req.file);
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {}
+      } else if (removeImage === "true") {
+        wish.image = null;
+      }
 
       await wish.save();
       res.json(wish.toJSON());

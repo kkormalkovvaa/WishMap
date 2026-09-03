@@ -35,10 +35,6 @@ const CreateWishForm = () => {
 
   const handleOpen = () => {
     setIsOpen(true);
-    setFormData(prev => ({
-      ...prev,
-      categoryId: prev.categoryId || categories[0]?.id || '',
-    }));
   };
 
   const handleSubmit = async (e) => {

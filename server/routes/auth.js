@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { authenticate } from "../middleware/auth.js";
 import User from "../models/User.js";
+import { seedDefaultCategories } from "../config/seedCategories.js";
 
 const router = Router();
 
@@ -84,6 +85,9 @@ router.post("/register", async (req, res) => {
       email: email.toLowerCase(),
       passwordHash,
     });
+
+    await seedDefaultCategories(user._id);
+
     const token = signToken(user._id);
 
     res.status(201).json({ token, user: user.toJSON() });

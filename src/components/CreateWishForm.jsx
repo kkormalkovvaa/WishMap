@@ -33,6 +33,14 @@ const CreateWishForm = () => {
   const [submitError, setSubmitError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const handleOpen = () => {
+    setIsOpen(true);
+    setFormData(prev => ({
+      ...prev,
+      categoryId: prev.categoryId || categories[0]?.id || '',
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
@@ -76,7 +84,7 @@ const CreateWishForm = () => {
 
   return (
     <div className="create-wish-form">
-      <button className="btn-open-form" onClick={() => setIsOpen(true)}>
+      <button className="btn-open-form" onClick={handleOpen}>
         <span>+</span> Добавить желание
       </button>
 

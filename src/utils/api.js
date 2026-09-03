@@ -19,7 +19,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
  */
 export function getImageUrl(path) {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
   return `${API_BASE}${path}`;
 }
 
